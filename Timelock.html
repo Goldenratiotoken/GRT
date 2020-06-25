@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Timelock</title>
+ <link href='https://fonts.googleapis.com/css?family=Open Sans:400,700' rel='stylesheet' type='text/css'>
+ <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+<script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js" type="text/javascript"></script>
+<script>
+function timelock(sc, quantity){
+// Modern dapp browsers...
+if (window.ethereum) {
+  this.web3Provider = window.ethereum;
+  try {
+    // Request account access
+	async function f() {
+		await window.ethereum.enable();
+		let contractAddress = "0xb83Cd8d39462B761bb0092437d38b37812dd80A2";
+		let targetAddress = "";
+		if(sc === 1)
+			targetAddress = "0x82b83577444af0E665624BB24c5F27A95bA4603b"; //cube (1)
+		if(sc === 2)
+			targetAddress = "0x994f997e449DEbE65443B6512d0b7f1585Fb3F02"; //test cube (2)
+		let web3Provider = new ethers.providers.Web3Provider(window.ethereum).getSigner()
+		let contractAbiFragment = [  {
+		"constant": false,
+		"inputs": [
+	  {
+        "internalType": "address",
+        "name": "spender",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "approveAndCall",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+	}];
+		let contract1 = new ethers.Contract(contractAddress, contractAbiFragment, web3Provider);
+
+		// How many tokens?
+		let numberOfDecimals = 18;
+		
+		let numberOfTokens = ethers.utils.parseUnits(quantity, numberOfDecimals);
+
+		// Send tokens
+		contract1.approveAndCall(targetAddress, numberOfTokens).then(function(tx) {
+		console.log(tx);
+		});
+		console.error("done")
+		}
+		f()
+	} catch (error) {
+    // User denied account access...
+    console.error("User denied account access (Modern dapp browser)")
+  }
+}
+// Legacy dapp browsers...
+else if (window.web3) {
+  try {
+	this.web3Provider = window.web3.currentProvider;
+	alert("Update dApp browser");
+  }
+  catch (error) {
+    // User denied account access...
+    console.error("User denied account access (Legacy dapp browser)")
+  }
+}
+}
+</script>
+<style>
+body {
+  background-color: #161616;
+  color: #eaeaea;
+}
+.button {
+color: black;
+}
+</style>
+</head>
+
+<body onload="myFunction()" class="container">
+
+<script>
+function myFunction() {
+	if (!window.ethereum || !window.web3) {
+		alert("You need MetaMask");
+	}	
+}
+</script>
+ <div id="main">
+ <h1>Timelock (under construction)</h1>
+ <!--<input type="button" value="1 GRT" onclick="timelock(1, 1);">
+ <input type="button" value="1 GRT (test contract)" onclick="timelock(2, 1);">-->
+ 
+     <h1>Deposit</h1>
+     <input type="text" id="input_deposit" placeholder="Amount" />
+     <button class="button" onclick="timelock(1, document.getElementById('input_deposit').value)">Deposit</button>
+ </div>
+
+</body>
+</html>
